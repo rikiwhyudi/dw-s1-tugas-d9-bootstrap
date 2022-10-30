@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"tugas9/connection"
-	"tugas9/middleware"
+	"tugas12/connection"
+	"tugas12/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -93,7 +93,11 @@ func main() {
 	http.ListenAndServe("localhost:5000", route)
 }
 
-
+	/* untuk keperluan penanganan request ke rute yang ditentukan
+	 Parameter ke-1 merupakan objek untuk keperluan http response
+	 parameter ke-2 yang bertipe pointer dereff *request, berisikan informasi-informasi yang berhubungan dengan http request 
+	 untuk rute yang bersangkutan.
+	 */
 func home(w http.ResponseWriter, r *http.Request) {
 	//mengatur header
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -102,6 +106,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	var tmpl, err  = template.ParseFiles("views/index.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		//meng-output-kan nilai balik data. Argumen method adalah data yang ingin dijadikan output
 		w.Write([]byte("message : " + err.Error()))
 		return
 	}
@@ -396,6 +401,17 @@ func edit(w http.ResponseWriter, r *http.Request) {
 	var content = r.PostForm.Get("inputContent")
 	var start = r.PostForm.Get("inputStart")
 	var end = r.PostForm.Get("inputEnd")
+	var nodejs = r.PostForm.Get("nodejs")
+	var nextjs = r.PostForm.Get("nextjs")
+	var reactjs = r.PostForm.Get("reactjs")
+	var typescript = r.PostForm.Get("typescript")
+	
+	var technologies = []string{
+		nodejs,
+		nextjs,
+		reactjs,
+		typescript,
+	} 
 
 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 	dataContex := r.Context().Value("dataFile")
@@ -405,7 +421,7 @@ func edit(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "SESSION_KEY")
 	// author := session.Values["Id"].(int)
 
-	_, err = connection.Conn.Exec(context.Background(), "UPDATE tb_projects SET title=$1, start_date=$2, end_date=$3, description=$4, image=$5 WHERE id=$6" , title, start, end, content, image, id)
+	_, err = connection.Conn.Exec(context.Background(), "UPDATE tb_projects SET title=$1, start_date=$2, end_date=$3, description=$4, image=$5, technologies=$6 WHERE id=$7" , title, start, end, content, image, technologies, id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
